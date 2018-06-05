@@ -1,11 +1,13 @@
 package net.simon987.npcplugin;
 
 import net.simon987.server.GameServer;
-import net.simon987.server.game.Direction;
-import net.simon987.server.game.Location;
-import net.simon987.server.game.TileMap;
-import net.simon987.server.game.World;
+import net.simon987.server.ServerConfiguration;
+import net.simon987.server.game.objects.Direction;
+import net.simon987.server.game.world.Location;
+import net.simon987.server.game.world.TileMap;
+import net.simon987.server.game.world.World;
 import net.simon987.server.logging.LogManager;
+import org.bson.types.ObjectId;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -43,16 +45,18 @@ public class VaultDimension {
          * 4. Choose a random world from the last layer and create the vault box there (objective)
          * 5. Create an exit portal in the home world
          *
-         * This process is actually done in 2 passes, in the first pass, worlds are defined
+         * This process is done in 2 passes, in the first pass, worlds are defined
          * as a set of coordinates + a list of opening directions, then they are actually generated
          */
 
-        int minLayerCount = 4;
-        int maxLayerCount = 6;
-        int minAttachedWorld = 0;
-        int maxAttachedWorld = 4; //todo cap at 4 to avoid infinite loop
-        int minElectricBoxCount = 2;
-        int maxElectricBoxCount = 4;
+        ServerConfiguration config = GameServer.INSTANCE.getConfig();
+
+        int minLayerCount = config.getInt("vault_wg_min_layer_count");
+        int maxLayerCount = config.getInt("vault_wg_max_layer_count");
+        int minAttachedWorld = config.getInt("vault_wg_min_attached_world");
+        int maxAttachedWorld = Math.min(config.getInt("vault_wg_max_attached_world"), 4);
+        int minElectricBoxCount = config.getInt("vault_wg_min_electric_box_count");
+        int maxElectricBoxCount = config.getInt("vault_wg_max_electric_box_count");
 
         HashMap<Integer, ArrayList<WorldBluePrint>> worldLayers = new HashMap<>();
         VaultWorldGenerator generator = new VaultWorldGenerator();
@@ -141,13 +145,14 @@ public class VaultDimension {
         if (exitPortalPt != null) {
 
             VaultExitPortal exitPortal = new VaultExitPortal();
-            exitPortal.setDst(exitLocation);
+            exitPortal.setDestination(exitLocation);
             exitPortal.setX(exitPortalPt.x);
             exitPortal.setY(exitPortalPt.y);
             exitPortal.setWorld(objectiveWorld);
+            exitPortal.setObjectId(new ObjectId());
             objectiveWorld.addObject(exitPortal);
 
-            LogManager.LOGGER.severe("Objective: " + objectiveWorld.getId());
+//            LogManager.LOGGER.severe("Objective: " + objectiveWorld.getId());
 
         } else {
             LogManager.LOGGER.severe("FIXME: Couldn't create exit portal for world " + homeWorld.getId());
@@ -158,10 +163,11 @@ public class VaultDimension {
         if (homePortalPt != null) {
 
             Portal homePortal = new Portal();
-            homePortal.setDst(exitLocation);
+            homePortal.setDestination(exitLocation);
             homePortal.setX(homePortalPt.x);
             homePortal.setY(homePortalPt.y);
             homePortal.setWorld(homeWorld);
+            homePortal.setObjectId(new ObjectId());
             homeWorld.addObject(homePortal);
 
             Point entryCoords = homePortal.getAdjacentTile();
@@ -250,5 +256,4 @@ public class VaultDimension {
 
         }
     }
-
 }

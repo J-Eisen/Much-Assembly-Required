@@ -4,8 +4,9 @@ import net.simon987.server.GameServer;
 import net.simon987.server.event.DebugCommandEvent;
 import net.simon987.server.event.GameEvent;
 import net.simon987.server.event.GameEventListener;
-import net.simon987.server.game.GameObject;
-import net.simon987.server.game.Programmable;
+import net.simon987.server.game.objects.GameObject;
+import net.simon987.server.game.objects.MessageReceiver;
+import org.bson.types.ObjectId;
 
 public class ComPortMsgCommandListener implements GameEventListener {
 
@@ -21,18 +22,18 @@ public class ComPortMsgCommandListener implements GameEventListener {
 
         if (e.getName().equals("comPortMsg")) {
 
-            long objectId = e.getLong("objectId");
+            ObjectId objectId = e.getObjectId("objectId");
 
             GameObject object = GameServer.INSTANCE.getGameUniverse().getObject(objectId);
 
             if (object != null) {
 
-                if (object instanceof Programmable) {
+                if (object instanceof MessageReceiver) {
 
-                    e.reply("Result: " + ((Programmable) object).sendMessage(e.getString("message").toCharArray()));
+                    e.reply("Result: " + ((MessageReceiver) object).sendMessage(e.getString("message").toCharArray()));
 
                 } else {
-                    e.reply("Object " + objectId + " not Programmable");
+                    e.reply("Object " + objectId + " not MessageReceiver");
                 }
 
             } else {

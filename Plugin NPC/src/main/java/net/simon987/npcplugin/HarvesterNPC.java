@@ -1,16 +1,13 @@
 package net.simon987.npcplugin;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import net.simon987.server.GameServer;
 import net.simon987.server.event.ObjectDeathEvent;
-import net.simon987.server.game.Direction;
+import net.simon987.server.game.objects.Direction;
+import org.bson.Document;
 import org.json.simple.JSONObject;
 
 
 public class HarvesterNPC extends NonPlayerCharacter {
-
-    public static final int ID = 10;
 
     public static final int MAX_HEALTH = GameServer.INSTANCE.getConfig().getInt("harvester_hp_max");
     public static final int HEAL_RATE = GameServer.INSTANCE.getConfig().getInt("harvester_regen");
@@ -22,6 +19,14 @@ public class HarvesterNPC extends NonPlayerCharacter {
         setHp(MAX_HEALTH);
         setMaxHp(MAX_HEALTH);
         setHealRate(HEAL_RATE);
+    }
+
+    public HarvesterNPC(Document document) {
+        super(document);
+
+        setTask(new HarvestTask());
+
+        setDirection(Direction.getDirection(document.getInteger("direction")));
     }
 
     @Override
@@ -54,56 +59,39 @@ public class HarvesterNPC extends NonPlayerCharacter {
             getFactory().getNpcs().remove(this);
         }
 
-        GameServer.INSTANCE.getEventDispatcher().dispatch(
-                new ObjectDeathEvent(this, ID));
+        GameServer.INSTANCE.getEventDispatcher().dispatch(new ObjectDeathEvent(this));
 
         return false;
     }
 
     @Override
-    public JSONObject serialise() {
-        JSONObject json = super.serialise();
+    public JSONObject jsonSerialise() {
+        JSONObject json = super.jsonSerialise();
 
-        json.put("i", getObjectId());
-        json.put("x", getX());
-        json.put("y", getY());
         json.put("direction", getDirection().ordinal());
         json.put("hp", getHp());
-        json.put("energy", energy);
         json.put("action", getAction().ordinal());
-        json.put("t", ID);
 
         return json;
     }
 
     @Override
-    public BasicDBObject mongoSerialise() {
-        BasicDBObject dbObject = new BasicDBObject();
+    public JSONObject debugJsonSerialise() {
+        JSONObject json = jsonSerialise();
 
-        dbObject.put("i", getObjectId());
-        dbObject.put("x", getX());
-        dbObject.put("y", getY());
-        dbObject.put("direction", getDirection().ordinal());
-        dbObject.put("hp", getHp());
-        //  dbObject.put("energy", energy);
-        dbObject.put("action", getAction().ordinal());
-        dbObject.put("t", ID);
+        json.put("taskCompleted", getTask().checkCompleted());
 
-        return dbObject;
+        return json;
     }
 
-    public static HarvesterNPC deserialize(DBObject obj) {
+    @Override
+    public Document mongoSerialise() {
+        Document dbObject = super.mongoSerialise();
 
-        HarvesterNPC npc = new HarvesterNPC();
-        npc.setObjectId((long) obj.get("i"));
-        npc.setX((int) obj.get("x"));
-        npc.setY((int) obj.get("y"));
-        npc.setHp((int) obj.get("hp"));
-        npc.setDirection(Direction.getDirection((int) obj.get("direction")));
-        // npc.energy = (int) obj.get("energy");
-        // npc.maxEnergy = GameServer.INSTANCE.getConfig().getInt("battery_max_energy");
+        dbObject.put("direction", getDirection().ordinal());
+        dbObject.put("hp", getHp());
+        dbObject.put("action", getAction().ordinal());
 
-        return npc;
-
+        return dbObject;
     }
 }

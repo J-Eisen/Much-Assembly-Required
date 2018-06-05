@@ -1,14 +1,14 @@
 package net.simon987.biomassplugin.event;
 
 import net.simon987.biomassplugin.BiomassBlob;
-import net.simon987.server.GameServer;
 import net.simon987.server.ServerConfiguration;
 import net.simon987.server.event.GameEvent;
 import net.simon987.server.event.GameEventListener;
 import net.simon987.server.event.ObjectDeathEvent;
-import net.simon987.server.game.GameObject;
-import net.simon987.server.game.World;
+import net.simon987.server.game.objects.GameObject;
+import net.simon987.server.game.world.World;
 import net.simon987.server.logging.LogManager;
+import org.bson.types.ObjectId;
 
 /**
  * Handles ObjectDeathEvent events
@@ -29,11 +29,10 @@ public class ObjectDeathListener implements GameEventListener {
 
     @Override
     public void handle(GameEvent event) {
-        // TODO: setup enum with all GameObject type IDs
-        if (((ObjectDeathEvent) event).getSourceObjectId() == 10) {
+
+        if (event.getSource().getClass().getCanonicalName().equals("net.simon987.npcplugin.HarvesterNPC")) {
             //An HarvesterNPC ObjectDeathEvent is received
             GameObject dyingHarvesterNPC = (GameObject)event.getSource();
-
 
             //Don't spawn biomass on World border
             if (dyingHarvesterNPC.getX() != 0 && dyingHarvesterNPC.getX() != dyingHarvesterNPC.getWorld().getWorldSize() - 1 &&
@@ -59,8 +58,7 @@ public class ObjectDeathListener implements GameEventListener {
     private BiomassBlob createBiomassBlobAt(int x, int y, World world) {
 
         BiomassBlob biomassBlob = new BiomassBlob();
-        biomassBlob.setObjectId(GameServer.INSTANCE.getGameUniverse().getNextObjectId());
-        // biomassBlob.setStyle(0); //TODO: set style depending on difficulty level? or random? from config?
+        biomassBlob.setObjectId(new ObjectId());
         biomassBlob.setBiomassCount(biomassDropCount);
         biomassBlob.setX(x);
         biomassBlob.setY(y);

@@ -6,9 +6,9 @@ import net.simon987.server.assembly.Status;
 import net.simon987.server.assembly.Target;
 
 /**
- * Send hardware interupt
- * Used to interact with the World using hardware
- * </p>
+ * Send hardware interrupt
+ * <br>Used to interact with the World using hardware
+ *
  */
 public class HwiInstruction extends Instruction {
 
@@ -23,7 +23,7 @@ public class HwiInstruction extends Instruction {
 
     @Override
     public Status execute(Target src, int srcIndex, Status status) {
-        status.setErrorFlag(cpu.hardwareInterrupt(src.get(srcIndex)));
+        status.setErrorFlag(cpu.getHardwareHost().hardwareInterrupt(src.get(srcIndex), cpu.getStatus()));
 
         return status;
     }
@@ -31,7 +31,7 @@ public class HwiInstruction extends Instruction {
     @Override
     public Status execute(int src, Status status) {
 
-        status.setErrorFlag(cpu.hardwareInterrupt(src));
+        status.setErrorFlag(cpu.getHardwareHost().hardwareInterrupt(src, cpu.getStatus()));
 
         return status;
     }

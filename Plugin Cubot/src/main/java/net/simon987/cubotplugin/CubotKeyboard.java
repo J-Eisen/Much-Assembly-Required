@@ -1,12 +1,10 @@
 package net.simon987.cubotplugin;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import net.simon987.server.GameServer;
-import net.simon987.server.assembly.CpuHardware;
 import net.simon987.server.assembly.Status;
+import net.simon987.server.game.objects.ControllableUnit;
+import org.bson.Document;
 
-public class CubotKeyboard extends CpuHardware {
+public class CubotKeyboard extends CubotHardwareModule {
 
     public static final int DEFAULT_ADDRESS = 4;
 
@@ -18,10 +16,12 @@ public class CubotKeyboard extends CpuHardware {
      */
     public static final char HWID = 0x0004;
 
-    private Cubot cubot;
-
     public CubotKeyboard(Cubot cubot) {
-        this.cubot = cubot;
+        super(cubot);
+    }
+
+    public CubotKeyboard(Document document, ControllableUnit cubot) {
+        super(document, cubot);
     }
 
     @Override
@@ -50,20 +50,5 @@ public class CubotKeyboard extends CpuHardware {
 
         }
 
-    }
-
-    @Override
-    public BasicDBObject mongoSerialise() {
-
-        BasicDBObject dbObject = new BasicDBObject();
-
-        dbObject.put("hwid", (int) HWID);
-        dbObject.put("cubot", cubot.getObjectId());
-
-        return dbObject;
-    }
-
-    public static CubotKeyboard deserialize(DBObject obj) {
-        return new CubotKeyboard((Cubot) GameServer.INSTANCE.getGameUniverse().getObject((long) obj.get("cubot")));
     }
 }

@@ -4,12 +4,12 @@ import net.simon987.npcplugin.Factory;
 import net.simon987.npcplugin.NpcPlugin;
 import net.simon987.npcplugin.RadioTower;
 import net.simon987.npcplugin.VaultDoor;
-import net.simon987.server.GameServer;
 import net.simon987.server.event.GameEvent;
 import net.simon987.server.event.GameEventListener;
 import net.simon987.server.event.WorldGenerationEvent;
-import net.simon987.server.game.World;
-import net.simon987.server.logging.LogManager;
+import net.simon987.server.game.world.TileMap;
+import net.simon987.server.game.world.World;
+import org.bson.types.ObjectId;
 
 import java.awt.*;
 import java.util.Random;
@@ -19,9 +19,13 @@ public class WorldCreationListener implements GameEventListener {
     /**
      * Spawn rate. Higher = rarer: A factory will be spawn about every FACTORY_SPAWN_RATE generated Worlds
      */
-    private static final int FACTORY_SPAWN_RATE = 35;
+    private static int FACTORY_SPAWN_RATE = 0;
 
     private Random random = new Random();
+
+    public WorldCreationListener(int factorySpawnRate) {
+        FACTORY_SPAWN_RATE = factorySpawnRate;
+    }
 
     @Override
     public Class getListenedEventType() {
@@ -45,7 +49,7 @@ public class WorldCreationListener implements GameEventListener {
                         Factory factory = new Factory();
 
                         factory.setWorld(world);
-                        factory.setObjectId(GameServer.INSTANCE.getGameUniverse().getNextObjectId());
+                        factory.setObjectId(new ObjectId());
                         factory.setX(x);
                         factory.setY(y);
 
@@ -57,15 +61,15 @@ public class WorldCreationListener implements GameEventListener {
                         world.addObject(factory);
                         world.incUpdatable();
 
-                        LogManager.LOGGER.info("Spawned Factory at (" + world.getX() + ", " + world.getY() +
-                                ") (" + x + ", " + y + ")");
+//                        LogManager.LOGGER.info("Spawned Factory at (" + world.getX() + ", " + world.getY() +
+//                                ") (" + x + ", " + y + ")");
                         break outerLoopFactory;
                     }
                 }
             }
 
             //Also spawn a radio tower in the same World
-            Point p = world.getRandomPassableTile();
+            Point p = world.getRandomTileWithAdjacent(8, TileMap.PLAIN_TILE);
             if (p != null) {
                 while (p.x == 0 || p.x == world.getWorldSize() - 1 || p.y == world.getWorldSize() - 1 || p.y == 0) {
                     p = world.getRandomPassableTile();
@@ -79,7 +83,7 @@ public class WorldCreationListener implements GameEventListener {
                 RadioTower radioTower = new RadioTower();
 
                 radioTower.setWorld(world);
-                radioTower.setObjectId(GameServer.INSTANCE.getGameUniverse().getNextObjectId());
+                radioTower.setObjectId(new ObjectId());
                 radioTower.setX(p.x);
                 radioTower.setY(p.y);
 
@@ -90,8 +94,8 @@ public class WorldCreationListener implements GameEventListener {
 
                     NpcPlugin.getRadioTowers().add(radioTower);
 
-                    LogManager.LOGGER.info("Spawned RadioTower at (" + world.getX() + ", " + world.getY() +
-                            ") (" + p.x + ", " + p.y + ")");
+//                    LogManager.LOGGER.info("Spawned RadioTower at (" + world.getX() + ", " + world.getY() +
+//                            ") (" + p.x + ", " + p.y + ")");
                 }
             }
 
@@ -123,15 +127,15 @@ public class WorldCreationListener implements GameEventListener {
                     }
                 }
 
-                vaultDoor.setObjectId(GameServer.INSTANCE.getGameUniverse().getNextObjectId());
+                vaultDoor.setObjectId(new ObjectId());
                 world.addObject(vaultDoor);
                 world.incUpdatable(); //In case the Factory & Radio Tower couldn't be spawned.
                 vaultDoor.setWorld(world);
 
                 vaultDoor.initialize();
 
-                LogManager.LOGGER.info("Spawned Vault Door at (" + world.getX() + ", " + world.getY() +
-                        ") (" + p.x + ", " + p.y + ")");
+//                LogManager.LOGGER.info("Spawned Vault Door at (" + world.getX() + ", " + world.getY() +
+//                        ") (" + p.x + ", " + p.y + ")");
             }
         }
     }

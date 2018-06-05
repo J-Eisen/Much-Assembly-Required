@@ -1,22 +1,18 @@
 package net.simon987.cubotplugin;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import net.simon987.server.GameServer;
-import net.simon987.server.assembly.CpuHardware;
 import net.simon987.server.assembly.Status;
-import net.simon987.server.game.GameObject;
-import net.simon987.server.game.Programmable;
+import net.simon987.server.game.objects.ControllableUnit;
+import net.simon987.server.game.objects.GameObject;
+import net.simon987.server.game.objects.MessageReceiver;
+import org.bson.Document;
 
 import java.awt.*;
 import java.util.ArrayList;
 
-public class CubotComPort extends CpuHardware {
+public class CubotComPort extends CubotHardwareModule {
 
     public static final char HWID = 0xD;
     public static final int DEFAULT_ADDRESS = 0xD;
-
-    private Cubot cubot;
 
     private static final int COMPORT_BUFFER_CLEAR = 0;
     private static final int COMPORT_POLL = 1;
@@ -25,7 +21,11 @@ public class CubotComPort extends CpuHardware {
     private static final int COMPORT_CONSOLE_CLEAR = 4;
 
     public CubotComPort(Cubot cubot) {
-        this.cubot = cubot;
+        super(cubot);
+    }
+
+    public CubotComPort(Document document, ControllableUnit cubot) {
+        super(document, cubot);
     }
 
     private static final int MESSAGE_LENGTH = 8;
@@ -73,7 +73,7 @@ public class CubotComPort extends CpuHardware {
                 //Todo will have to add getGameObjectsBlockingAt to enable Factory
                 ArrayList<GameObject> objects = cubot.getWorld().getGameObjectsAt(frontTile.x, frontTile.y);
 
-                if (objects.size() > 0 && objects.get(0) instanceof Programmable) {
+                if (objects.size() > 0 && objects.get(0) instanceof MessageReceiver) {
 
                     int x = getCpu().getRegisterSet().getRegister("X").getValue();
 
@@ -86,9 +86,9 @@ public class CubotComPort extends CpuHardware {
                         char[] message = new char[MESSAGE_LENGTH];
                         System.arraycopy(getCpu().getMemory().getWords(), x, message, 0, MESSAGE_LENGTH);
 
-                        //Send it to the Programmable object
+                        //Send it to the MessageReceiver object
                         getCpu().getRegisterSet().getRegister("B").setValue(
-                                ((Programmable) objects.get(0)).sendMessage(message) ? 1 : 0);
+                                ((MessageReceiver) objects.get(0)).sendMessage(message) ? 1 : 0);
                         return;
                     }
                 }
@@ -118,27 +118,10 @@ public class CubotComPort extends CpuHardware {
 
             getCpu().getRegisterSet().getRegister("B").setValue(0); //Failed
         }
-
-
     }
 
     @Override
     public char getId() {
         return HWID;
-    }
-
-    @Override
-    public BasicDBObject mongoSerialise() {
-
-        BasicDBObject dbObject = new BasicDBObject();
-
-        dbObject.put("hwid", (int) HWID);
-        dbObject.put("cubot", cubot.getObjectId());
-
-        return dbObject;
-    }
-
-    public static CubotComPort deserialize(DBObject obj) {
-        return new CubotComPort((Cubot) GameServer.INSTANCE.getGameUniverse().getObject((long) obj.get("cubot")));
     }
 }

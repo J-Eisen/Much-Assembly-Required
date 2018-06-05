@@ -1,20 +1,29 @@
 package net.simon987.mischwplugin;
 
-import com.mongodb.BasicDBObject;
-import net.simon987.server.assembly.CpuHardware;
+import net.simon987.server.assembly.HardwareModule;
 import net.simon987.server.assembly.Status;
+import net.simon987.server.game.objects.ControllableUnit;
+import org.bson.Document;
 
 import java.util.Random;
 
-public class RandomNumberGenerator extends CpuHardware {
+/**
+ * Hardware to generate random numbers
+ */
+public class RandomNumberGenerator extends HardwareModule {
 
-    public static final char HWID = 0x0007;
+    private static final char HWID = 0x0007;
 
     public static final char DEFAULT_ADDRESS = 0x0007;
 
     private Random random;
 
     public RandomNumberGenerator() {
+        random = new Random();
+    }
+
+    public RandomNumberGenerator(Document document, ControllableUnit unit) {
+        super(document, unit);
         random = new Random();
     }
 
@@ -31,16 +40,11 @@ public class RandomNumberGenerator extends CpuHardware {
     }
 
     @Override
-    public BasicDBObject mongoSerialise() {
+    public Document mongoSerialise() {
 
-        BasicDBObject dbObject = new BasicDBObject();
-
-        dbObject.put("hwid", (int) HWID);
+        Document dbObject = new Document();
+        dbObject.put("type", getClass().getCanonicalName());
 
         return dbObject;
-    }
-
-    public static RandomNumberGenerator deserialize() {
-        return new RandomNumberGenerator();
     }
 }

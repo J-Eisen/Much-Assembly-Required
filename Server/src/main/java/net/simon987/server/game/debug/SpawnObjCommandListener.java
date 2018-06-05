@@ -1,13 +1,13 @@
 package net.simon987.server.game.debug;
 
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 import net.simon987.server.GameServer;
 import net.simon987.server.event.DebugCommandEvent;
 import net.simon987.server.event.GameEvent;
 import net.simon987.server.event.GameEventListener;
-import net.simon987.server.game.GameObject;
-import net.simon987.server.game.World;
+import net.simon987.server.game.objects.GameObject;
+import net.simon987.server.game.world.World;
+import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import java.util.Arrays;
 
@@ -28,10 +28,10 @@ public class SpawnObjCommandListener implements GameEventListener {
                 World world = GameServer.INSTANCE.getGameUniverse().getWorld(e.getInt("worldX"), e.getInt("worldY"),
                         false, e.getString("dimension"));
 
-                DBObject dbObj = (DBObject) JSON.parse(e.getString("data"));
-                dbObj.put("i", GameServer.INSTANCE.getGameUniverse().getNextObjectId());
+                Document dbObj = Document.parse(e.getString("data"));
+                dbObj.put("id", new ObjectId());
 
-                GameObject object = GameObject.deserialize(dbObj);
+                GameObject object = GameServer.INSTANCE.getRegistry().deserializeGameObject(dbObj);
 
                 if (object != null) {
                     world.addObject(object);

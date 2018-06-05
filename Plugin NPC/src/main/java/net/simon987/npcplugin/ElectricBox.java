@@ -1,36 +1,55 @@
 package net.simon987.npcplugin;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import net.simon987.server.GameServer;
 import net.simon987.server.assembly.Util;
-import net.simon987.server.game.Attackable;
-import net.simon987.server.game.GameObject;
-import net.simon987.server.game.Rechargeable;
-import net.simon987.server.game.Updatable;
-import net.simon987.server.logging.LogManager;
+import net.simon987.server.game.objects.Attackable;
+import net.simon987.server.game.objects.GameObject;
+import net.simon987.server.game.objects.Rechargeable;
+import net.simon987.server.game.objects.Updatable;
+import org.bson.Document;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 
+/**
+ * Game object that deals damage to nearby objects and gives them energy
+ */
 public class ElectricBox extends GameObject implements Updatable, Attackable {
 
-    public static final int ID = 7;
-
+    /**
+     * Hit points
+     */
+    private int hp;
+    /**
+     * Maximum hit points
+     */
     private static final int maxHp = GameServer.INSTANCE.getConfig().getInt("electric_box_hp");
+    /**
+     * Number of hit points dealt to nearby objects each tick
+     */
     private static final int damageDealt = GameServer.INSTANCE.getConfig().getInt("electric_box_damage");
+    /**
+     * Number of energy points given to nearby objects each tick
+     */
     private static final int energyGiven = GameServer.INSTANCE.getConfig().getInt("electric_box_energy_given");
 
-    private int hp;
-
+    /**
+     * List of nearby objects. Is updated every tick
+     */
     private ArrayList<Attackable> nearObjects = new ArrayList<>();
 
     public ElectricBox() {
-
-        this.hp = maxHp;
-
+        hp = maxHp;
     }
 
+    public ElectricBox(Document document) {
+        super(document);
+        hp = document.getInteger("hp");
+    }
+
+    /**
+     * Currently has no effect
+     */
     @Override
     public void setHealRate(int hp) {
         //no op
@@ -51,11 +70,17 @@ public class ElectricBox extends GameObject implements Updatable, Attackable {
         return hp;
     }
 
+    /**
+     * Currently has no effect
+     */
     @Override
     public void setMaxHp(int hp) {
         //No op
     }
 
+    /**
+     * Currently has no effect
+     */
     @Override
     public void heal(int amount) {
         //No op
@@ -68,7 +93,6 @@ public class ElectricBox extends GameObject implements Updatable, Attackable {
         //YOU ARE DEAD
         if (hp <= 0) {
             setDead(true);
-            LogManager.LOGGER.severe("BOX DEAD");
         }
     }
 
@@ -77,6 +101,10 @@ public class ElectricBox extends GameObject implements Updatable, Attackable {
         return Obstacle.MAP_INFO;
     }
 
+    /**
+     * Updates the current list nearby objects
+     * <br>An object is considered 'nearby' if its Manhattan distance is {@literal <= @} 1 and is Attackable
+     */
     private void updateNearObjects() {
 
         nearObjects.clear();
@@ -89,6 +117,9 @@ public class ElectricBox extends GameObject implements Updatable, Attackable {
         }
     }
 
+    /**
+     * Called every tick
+     */
     @Override
     public void update() {
 
@@ -105,40 +136,21 @@ public class ElectricBox extends GameObject implements Updatable, Attackable {
     }
 
     @Override
-    public JSONObject serialise() {
-        JSONObject json = new JSONObject();
+    public JSONObject jsonSerialise() {
+        JSONObject json = super.jsonSerialise();
 
-        json.put("i", getObjectId());
-        json.put("x", getX());
-        json.put("y", getY());
-        json.put("t", ID);
         json.put("hp", hp);
 
         return json;
     }
 
     @Override
-    public BasicDBObject mongoSerialise() {
-        BasicDBObject dbObject = new BasicDBObject();
+    public Document mongoSerialise() {
+        Document dbObject = super.mongoSerialise();
 
-        dbObject.put("i", getObjectId());
-        dbObject.put("x", getX());
-        dbObject.put("y", getY());
-        dbObject.put("t", ID);
         dbObject.put("hp", getHp());
 
         return dbObject;
-    }
-
-    public static ElectricBox deserialize(DBObject obj) {
-
-        ElectricBox electricBox = new ElectricBox();
-        electricBox.setHp((int) obj.get("hp"));
-        electricBox.setObjectId((long) obj.get("i"));
-        electricBox.setX((int) obj.get("x"));
-        electricBox.setY((int) obj.get("y"));
-
-        return electricBox;
     }
 
     @Override

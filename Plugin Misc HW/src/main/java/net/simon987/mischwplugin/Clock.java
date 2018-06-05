@@ -1,16 +1,28 @@
 package net.simon987.mischwplugin;
 
-import com.mongodb.BasicDBObject;
 import net.simon987.server.GameServer;
-import net.simon987.server.assembly.CpuHardware;
+import net.simon987.server.assembly.HardwareModule;
 import net.simon987.server.assembly.Status;
 import net.simon987.server.assembly.Util;
+import net.simon987.server.game.objects.ControllableUnit;
+import org.bson.Document;
 
-public class Clock extends CpuHardware {
+/**
+ * Hardware to get game time
+ */
+public class Clock extends HardwareModule {
 
-    public static final char HWID = 0x0008;
+    private static final char HWID = 0x0008;
 
     public static final char DEFAULT_ADDRESS = 0x0008;
+
+    public Clock() {
+
+    }
+
+    public Clock(Document document, ControllableUnit unit) {
+        super(document, unit);
+    }
 
     @Override
     public void handleInterrupt(Status status) {
@@ -28,17 +40,12 @@ public class Clock extends CpuHardware {
         return HWID;
     }
 
-    public static Clock deserialize() {
-        return new Clock();
-    }
-
 
     @Override
-    public BasicDBObject mongoSerialise() {
+    public Document mongoSerialise() {
 
-        BasicDBObject dbObject = new BasicDBObject();
-
-        dbObject.put("hwid", (int) HWID);
+        Document dbObject = new Document();
+        dbObject.put("type", getClass().getCanonicalName());
 
         return dbObject;
     }

@@ -1,7 +1,10 @@
 package net.simon987.server.event;
 
-import net.simon987.server.webserver.OnlineUser;
+import net.simon987.server.websocket.OnlineUser;
+import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
+
+import java.io.IOException;
 
 public class DebugCommandEvent extends GameEvent {
 
@@ -28,6 +31,10 @@ public class DebugCommandEvent extends GameEvent {
         return (long) command.get(key);
     }
 
+    public ObjectId getObjectId(String key) {
+        return (ObjectId) command.get(key);
+    }
+
     /**
      * Send back a response to the command issuer
      */
@@ -37,7 +44,11 @@ public class DebugCommandEvent extends GameEvent {
         response.put("t", "debug");
         response.put("message", message);
 
-        ((OnlineUser) getSource()).getWebSocket().send(response.toJSONString());
+        try {
+            ((OnlineUser) getSource()).getWebSocket().getRemote().sendString(response.toJSONString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

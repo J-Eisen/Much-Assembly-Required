@@ -1,12 +1,10 @@
 package net.simon987.cubotplugin;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import net.simon987.server.GameServer;
-import net.simon987.server.assembly.CpuHardware;
 import net.simon987.server.assembly.Status;
+import net.simon987.server.game.objects.ControllableUnit;
+import org.bson.Document;
 
-public class CubotHologram extends CpuHardware {
+public class CubotHologram extends CubotHardwareModule {
 
 
     /**
@@ -15,8 +13,6 @@ public class CubotHologram extends CpuHardware {
     static final char HWID = 0x0009;
 
     public static final int DEFAULT_ADDRESS = 9;
-
-    private Cubot cubot;
 
     private static final int HOLO_CLEAR = 0;
     private static final int HOLO_DISPLAY_HEX = 1;
@@ -27,7 +23,11 @@ public class CubotHologram extends CpuHardware {
     private static final int STR_MAX_LEN = 8;
 
     public CubotHologram(Cubot cubot) {
-        this.cubot = cubot;
+        super(cubot);
+    }
+
+    public CubotHologram(Document document, ControllableUnit cubot) {
+        super(document, cubot);
     }
 
     @Override
@@ -81,21 +81,6 @@ public class CubotHologram extends CpuHardware {
     @Override
     public char getId() {
         return HWID;
-    }
-
-    public static CubotHologram deserialize(DBObject obj) {
-        return new CubotHologram((Cubot) GameServer.INSTANCE.getGameUniverse().getObject((long) obj.get("cubot")));
-    }
-
-    @Override
-    public BasicDBObject mongoSerialise() {
-
-        BasicDBObject dbObject = new BasicDBObject();
-
-        dbObject.put("hwid", (int) HWID);
-        dbObject.put("cubot", cubot.getObjectId());
-
-        return dbObject;
     }
 
 }

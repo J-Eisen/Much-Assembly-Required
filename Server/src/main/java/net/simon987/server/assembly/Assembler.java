@@ -1,5 +1,6 @@
 package net.simon987.server.assembly;
 
+import net.simon987.server.GameServer;
 import net.simon987.server.ServerConfiguration;
 import net.simon987.server.assembly.exception.*;
 import net.simon987.server.logging.LogManager;
@@ -24,7 +25,7 @@ public class Assembler {
 
     private RegisterSet registerSet;
 
-    private static final int MEM_SIZE = 0x10000;  // Size in words todo load from config
+    private static final int MEM_SIZE = GameServer.INSTANCE.getConfig().getInt("memory_size");
 
     public Assembler(InstructionSet instructionSet, RegisterSet registerSet, ServerConfiguration config) {
         this.instructionSet = instructionSet;
@@ -61,7 +62,7 @@ public class Assembler {
     /**
      * Check for and save the origin
      *
-     * @param line   Current line. Assuming that the comments & labels are removed
+     * @param line   Current line. Assuming that the comments and labels are removed
      * @param result Current line number
      */
     private static void checkForORGInstruction(String line, AssemblyResult result, int currentLine)
@@ -121,7 +122,7 @@ public class Assembler {
     /**
      * Parse the DW instruction (Define word). Handles DUP operator
      *
-     * @param line        Current line. assuming that comments & labels are removed
+     * @param line        Current line. assuming that comments and labels are removed
      * @param currentLine Current line number
      * @param labels      Map of labels
      * @return Encoded instruction, null if the line is not a DW instruction
@@ -258,7 +259,7 @@ public class Assembler {
     /**
      * Parse the DW instruction (Define word). Handles DUP operator
      *
-     * @param line        Current line. assuming that comments & labels are removed
+     * @param line        Current line. assuming that comments and labels are removed
      * @param currentLine Current line number
      * @return Encoded instruction, null if the line is not a DW instruction
      */
@@ -267,7 +268,7 @@ public class Assembler {
     }
 
     /**
-     * Check for and handle section declarations (.text & .data)
+     * Check for and handle section declarations (.text and .data)
      *
      * @param line Current line
      */

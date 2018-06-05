@@ -4,8 +4,8 @@ import net.simon987.server.GameServer;
 import net.simon987.server.event.DebugCommandEvent;
 import net.simon987.server.event.GameEvent;
 import net.simon987.server.event.GameEventListener;
-import net.simon987.server.game.Attackable;
-import net.simon987.server.game.GameObject;
+import net.simon987.server.game.objects.Attackable;
+import net.simon987.server.game.objects.GameObject;
 
 
 public class HealObjCommandListener implements GameEventListener {
@@ -22,7 +22,7 @@ public class HealObjCommandListener implements GameEventListener {
 
         if (e.getName().equals("healObj")) {
 
-            GameObject object = GameServer.INSTANCE.getGameUniverse().getObject(e.getLong("objectId"));
+            GameObject object = GameServer.INSTANCE.getGameUniverse().getObject(e.getObjectId("objectId"));
 
             if (object != null) {
 
@@ -42,5 +42,4 @@ public class HealObjCommandListener implements GameEventListener {
             }
         }
     }
-
 }

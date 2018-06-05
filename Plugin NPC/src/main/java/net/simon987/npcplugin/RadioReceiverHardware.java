@@ -1,17 +1,15 @@
 package net.simon987.npcplugin;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import net.simon987.server.GameServer;
-import net.simon987.server.assembly.CpuHardware;
+import net.simon987.server.assembly.HardwareModule;
 import net.simon987.server.assembly.Status;
 import net.simon987.server.assembly.Util;
-import net.simon987.server.game.Action;
-import net.simon987.server.game.ControllableUnit;
+import net.simon987.server.game.objects.Action;
+import net.simon987.server.game.objects.ControllableUnit;
+import org.bson.Document;
 
 import java.util.ArrayList;
 
-public class RadioReceiverHardware extends CpuHardware {
+public class RadioReceiverHardware extends HardwareModule {
 
     public static final char HWID = 0xC; //12
 
@@ -23,6 +21,12 @@ public class RadioReceiverHardware extends CpuHardware {
 
     public RadioReceiverHardware(ControllableUnit cubot) {
         this.cubot = cubot;
+    }
+
+    public RadioReceiverHardware(Document document, ControllableUnit unit) {
+        super(document, unit);
+
+        this.cubot = unit;
     }
 
     @Override
@@ -67,17 +71,13 @@ public class RadioReceiverHardware extends CpuHardware {
 
 
     @Override
-    public BasicDBObject mongoSerialise() {
+    public Document mongoSerialise() {
 
-        BasicDBObject dbObject = new BasicDBObject();
+        Document dbObject = new Document();
 
-        dbObject.put("hwid", (int) HWID);
+        dbObject.put("type", getClass().getCanonicalName());
         dbObject.put("cubot", cubot.getObjectId());
 
         return dbObject;
-    }
-
-    public static RadioReceiverHardware deserialize(DBObject obj) {
-        return new RadioReceiverHardware((ControllableUnit) GameServer.INSTANCE.getGameUniverse().getObject((long) obj.get("cubot")));
     }
 }

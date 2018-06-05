@@ -1,19 +1,14 @@
 package net.simon987.cubotplugin;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import net.simon987.server.GameServer;
-import net.simon987.server.assembly.CpuHardware;
 import net.simon987.server.assembly.Status;
-import net.simon987.server.game.Action;
-import net.simon987.server.game.Attackable;
-import net.simon987.server.game.GameObject;
-import net.simon987.server.game.InventoryHolder;
+import net.simon987.server.game.objects.*;
+import org.bson.Document;
 
 import java.awt.*;
 import java.util.ArrayList;
 
-public class CubotLaser extends CpuHardware {
+public class CubotLaser extends CubotHardwareModule {
 
     /**
      * Hardware ID (Should be unique)
@@ -22,8 +17,6 @@ public class CubotLaser extends CpuHardware {
 
     public static final int DEFAULT_ADDRESS = 2;
 
-    private Cubot cubot;
-
     private static final int LASER_WITHDRAW = 1;
     private static final int LASER_DEPOSIT = 2;
     private static final int LASER_ATTACK = 3;
@@ -31,7 +24,11 @@ public class CubotLaser extends CpuHardware {
     private static final int LASER_DAMAGE = 25;
 
     public CubotLaser(Cubot cubot) {
-        this.cubot = cubot;
+        super(cubot);
+    }
+
+    public CubotLaser(Document document, ControllableUnit cubot) {
+        super(document, cubot);
     }
 
     @Override
@@ -55,12 +52,12 @@ public class CubotLaser extends CpuHardware {
             if (cubot.getCurrentAction() == Action.IDLE && objects.size() > 0) {
                 //FIXME: Problem here if more than 1 object
                 if (objects.get(0) instanceof InventoryHolder) {
+
                     if (((InventoryHolder) objects.get(0)).canTakeItem(b)) {
                         if (cubot.spendEnergy(30)) {
                             //Take the item
                             ((InventoryHolder) objects.get(0)).takeItem(b);
-
-                            cubot.setHeldItem(b);
+                            cubot.giveItem(GameServer.INSTANCE.getRegistry().makeItem(b));
                             cubot.setCurrentAction(Action.WITHDRAWING);
                         }
                     }
@@ -90,20 +87,5 @@ public class CubotLaser extends CpuHardware {
             }
         }
 
-    }
-
-    @Override
-    public BasicDBObject mongoSerialise() {
-
-        BasicDBObject dbObject = new BasicDBObject();
-
-        dbObject.put("hwid", (int) HWID);
-        dbObject.put("cubot", cubot.getObjectId());
-
-        return dbObject;
-    }
-
-    public static CubotLaser deserialize(DBObject obj) {
-        return new CubotLaser((Cubot) GameServer.INSTANCE.getGameUniverse().getObject((long) obj.get("cubot")));
     }
 }

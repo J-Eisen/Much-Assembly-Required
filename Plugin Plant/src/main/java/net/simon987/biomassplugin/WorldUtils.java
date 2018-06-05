@@ -1,9 +1,8 @@
 package net.simon987.biomassplugin;
 
-import net.simon987.server.GameServer;
-import net.simon987.server.game.TileMap;
-import net.simon987.server.game.World;
-import net.simon987.server.logging.LogManager;
+import net.simon987.server.game.world.TileMap;
+import net.simon987.server.game.world.World;
+import org.bson.types.ObjectId;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -63,8 +62,7 @@ public class WorldUtils {
                 }
 
                 BiomassBlob biomassBlob = new BiomassBlob();
-                biomassBlob.setObjectId(GameServer.INSTANCE.getGameUniverse().getNextObjectId());
-                // biomassBlob.setStyle(0); //TODO: set style depending on difficulty level? or random? from config?
+                biomassBlob.setObjectId(new ObjectId());
                 biomassBlob.setBiomassCount(yield);
                 biomassBlob.setX(p.x);
                 biomassBlob.setY(p.y);
@@ -74,8 +72,8 @@ public class WorldUtils {
             }
         }
 
-        LogManager.LOGGER.info("Generated " + biomassBlobs.size() + " biomassBlobs for World (" + world.getX() + ',' +
-                world.getY() + ')');
+//        LogManager.LOGGER.info("Generated " + biomassBlobs.size() + " biomassBlobs for World (" + world.getX() + ',' +
+//                world.getY() + ')');
 
         return biomassBlobs;
     }

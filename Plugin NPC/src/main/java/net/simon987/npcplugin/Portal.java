@@ -1,23 +1,51 @@
 package net.simon987.npcplugin;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import net.simon987.server.GameServer;
-import net.simon987.server.game.*;
-import org.json.simple.JSONObject;
+import net.simon987.server.game.objects.Enterable;
+import net.simon987.server.game.objects.GameObject;
+import net.simon987.server.game.objects.Structure;
+import net.simon987.server.game.objects.Updatable;
+import net.simon987.server.game.world.Location;
+import net.simon987.server.game.world.World;
+import org.bson.Document;
 
-public class Portal extends GameObject implements Enterable {
 
-    private Location dst;
+public class Portal extends Structure implements Enterable {
+
+    /**
+     * Destination location
+     */
+    private Location destination;
 
     public static final int MAP_INFO = 0x0020;
 
-    public static final int ID = 8;
+    public Portal() {
+        super(1, 1);
+    }
 
+    public Portal(Document document) {
+        super(document, 1, 1);
+
+        destination = new Location(
+                document.getInteger("dstWorldX"),
+                document.getInteger("dstWorldY"),
+                document.getString("dstDimension"),
+                document.getInteger("dstX"),
+                document.getInteger("dstY"));
+        setX(document.getInteger("x"));
+        setY(document.getInteger("y"));
+    }
+
+    /**
+     * Called when an object attempts to walk directly into a Enterable object
+     *
+     * @param object The game object that attempted to enter
+     * @return true if successful, false to block the object
+     */
     @Override
     public boolean enter(GameObject object) {
 
-        World world = GameServer.INSTANCE.getGameUniverse().getWorld(dst.worldX, dst.worldY, false, dst.dimension);
+        World world = GameServer.INSTANCE.getGameUniverse().getWorld(destination.worldX, destination.worldY, false, destination.dimension);
 
         if (object instanceof Updatable) {
             object.getWorld().decUpdatable();
@@ -27,8 +55,8 @@ public class Portal extends GameObject implements Enterable {
         object.setWorld(world);
         world.addObject(object);
 
-        object.setX(dst.x);
-        object.setY(dst.y);
+        object.setX(destination.x);
+        object.setY(destination.y);
 
         return true;
     }
@@ -39,55 +67,23 @@ public class Portal extends GameObject implements Enterable {
     }
 
     @Override
-    public BasicDBObject mongoSerialise() {
-        BasicDBObject dbObject = new BasicDBObject();
+    public Document mongoSerialise() {
+        Document dbObject = super.mongoSerialise();
 
-        dbObject.put("i", getObjectId());
-        dbObject.put("x", getX());
-        dbObject.put("y", getY());
-        dbObject.put("t", ID);
-        dbObject.put("dstWorldX", dst.worldX);
-        dbObject.put("dstWorldY", dst.worldY);
-        dbObject.put("dstX", dst.x);
-        dbObject.put("dstY", dst.y);
-        dbObject.put("dstDimension", dst.dimension);
+        dbObject.put("dstWorldX", destination.worldX);
+        dbObject.put("dstWorldY", destination.worldY);
+        dbObject.put("dstX", destination.x);
+        dbObject.put("dstY", destination.y);
+        dbObject.put("dstDimension", destination.dimension);
 
         return dbObject;
     }
 
-    public static Portal deserialize(DBObject obj) {
-
-        Portal portal = new Portal();
-
-        portal.dst = new Location(
-                (int) obj.get("dstWorldX"),
-                (int) obj.get("dstWorldY"),
-                (String) obj.get("dstDimension"),
-                (int) obj.get("dstX"),
-                (int) obj.get("dstY"));
-        portal.setX((int) obj.get("x"));
-        portal.setY((int) obj.get("y"));
-
-        return portal;
+    public Location getDestination() {
+        return destination;
     }
 
-    @Override
-    public JSONObject serialise() {
-        JSONObject json = new JSONObject();
-
-        json.put("i", getObjectId());
-        json.put("x", getX());
-        json.put("y", getY());
-        json.put("t", ID);
-
-        return json;
-    }
-
-    public Location getDst() {
-        return dst;
-    }
-
-    public void setDst(Location dst) {
-        this.dst = dst;
+    public void setDestination(Location destination) {
+        this.destination = destination;
     }
 }

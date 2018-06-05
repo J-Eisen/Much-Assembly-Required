@@ -4,6 +4,8 @@ import org.json.simple.JSONObject;
 
 public interface JSONSerialisable {
 
-    JSONObject serialise();
+    JSONObject jsonSerialise();
+
+    JSONObject debugJsonSerialise();
 
 }

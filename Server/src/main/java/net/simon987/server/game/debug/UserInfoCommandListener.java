@@ -4,7 +4,7 @@ import net.simon987.server.GameServer;
 import net.simon987.server.event.DebugCommandEvent;
 import net.simon987.server.event.GameEvent;
 import net.simon987.server.event.GameEventListener;
-import net.simon987.server.game.ControllableUnit;
+import net.simon987.server.game.objects.ControllableUnit;
 import net.simon987.server.user.User;
 
 public class UserInfoCommandListener implements GameEventListener {
@@ -32,7 +32,7 @@ public class UserInfoCommandListener implements GameEventListener {
                 ControllableUnit unit = user.getControlledUnit();
                 message += "ControlledUnit: " + unit.getObjectId() + " at (" + unit.getX() + ", " + unit.getY() + ")\n";
 
-                message += "CPU:" + user.getCpu() + "\n";
+                message += "CPU:" + user.getControlledUnit().getCpu() + "\n";
                 message += "Code: " + user.getUserCode();
 
                 e.reply(message);

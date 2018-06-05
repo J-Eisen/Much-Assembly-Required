@@ -2,27 +2,39 @@ package net.simon987.npcplugin;
 
 
 import net.simon987.server.assembly.Util;
-import net.simon987.server.game.Direction;
-import net.simon987.server.game.GameObject;
-import net.simon987.server.game.InventoryHolder;
+import net.simon987.server.game.objects.Direction;
+import net.simon987.server.game.objects.GameObject;
+import net.simon987.server.game.objects.InventoryHolder;
 import net.simon987.server.logging.LogManager;
 
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * Find Biomass, move towards it, collect it, repeat
+ */
 public class HarvestTask extends NPCTask {
 
     private Random random;
 
+    /**
+     * Number of ticks to wait before continuing
+     */
     private int pause;
+
+    /**
+     * Direction of the next world to visit (randomly chosen)
+     */
+    private Direction nextWorldDirection = null;
 
     public HarvestTask() {
         random = new Random();
         pause = 0;
     }
 
-    private Direction nextWorldDirection = null;
-
+    /**
+     * This task never finishes
+     */
     @Override
     public boolean checkCompleted() {
         return false;
@@ -33,9 +45,7 @@ public class HarvestTask extends NPCTask {
 
         if (pause == 0) {
             //Get biomass
-            /* todo replace by some sort of .collect call with object
-            id (See https://github.com/simon987/Much-Assembly-Required/pull/66)*/
-            ArrayList<GameObject> biomass = npc.getWorld().findObjects(0x4000);
+            ArrayList<GameObject> biomass = npc.getWorld().findGameObjects("net.simon987.biomassplugin.BiomassBlob");
 
             //Get closest one
             int minDist = Integer.MAX_VALUE;
@@ -93,8 +103,5 @@ public class HarvestTask extends NPCTask {
         } else {
             pause--;
         }
-
     }
-
-
 }

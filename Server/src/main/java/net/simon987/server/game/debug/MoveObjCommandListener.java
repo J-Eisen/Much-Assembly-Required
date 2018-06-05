@@ -4,7 +4,7 @@ import net.simon987.server.GameServer;
 import net.simon987.server.event.DebugCommandEvent;
 import net.simon987.server.event.GameEvent;
 import net.simon987.server.event.GameEventListener;
-import net.simon987.server.game.GameObject;
+import net.simon987.server.game.objects.GameObject;
 
 public class MoveObjCommandListener implements GameEventListener {
 
@@ -20,7 +20,7 @@ public class MoveObjCommandListener implements GameEventListener {
 
         if (e.getName().equals("moveObj")) {
 
-            GameObject object = GameServer.INSTANCE.getGameUniverse().getObject(e.getLong("objectId"));
+            GameObject object = GameServer.INSTANCE.getGameUniverse().getObject(e.getObjectId("objectId"));
 
             if (object != null) {
 

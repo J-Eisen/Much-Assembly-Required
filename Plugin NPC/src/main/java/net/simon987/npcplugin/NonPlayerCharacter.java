@@ -2,34 +2,43 @@ package net.simon987.npcplugin;
 
 import net.simon987.server.GameServer;
 import net.simon987.server.assembly.Util;
-import net.simon987.server.game.*;
+import net.simon987.server.game.objects.*;
 import net.simon987.server.game.pathfinding.Node;
 import net.simon987.server.game.pathfinding.Pathfinder;
 import net.simon987.server.logging.LogManager;
+import org.bson.Document;
 
 import java.util.ArrayList;
 
+/**
+ * Game object that actively interacts with the game world by doing tasks
+ */
 public abstract class NonPlayerCharacter extends GameObject implements Updatable, Attackable {
 
     private static final int MAP_INFO = 0x0040;
 
+    /**
+     * Maximum distance to travel from its factory, in Worlds
+     */
     private static final int MAX_FACTORY_DISTANCE = GameServer.INSTANCE.getConfig().getInt("npc_max_factory_distance");
 
+    /**
+     * Number of ticks to live
+     */
     public static final int LIFETIME = GameServer.INSTANCE.getConfig().getInt("npc_lifetime");
 
     // Set these just in case they aren't overridden in the subclass
     public static final int HP_MAX_DEFAULT = 100;
     public static final int HP_REGEN_RATE_DEFAULT = 0;
 
-    //Unused
-    int energy;
-    int maxEnergy;
-
     /**
      * Current task
      */
     private NPCTask task;
 
+    /**
+     * Action at the end of the last tick
+     */
     private Action lastAction = Action.IDLE;
 
     /**
@@ -62,6 +71,17 @@ public abstract class NonPlayerCharacter extends GameObject implements Updatable
      * Maximum health of the npc
      */
     private int maxHp = HP_MAX_DEFAULT;
+
+    public NonPlayerCharacter() {
+
+    }
+
+    public NonPlayerCharacter(Document document) {
+        super(document);
+
+        hp = document.getInteger("hp");
+        setDirection(Direction.getDirection(document.getInteger("direction")));
+    }
 
     @Override
     public char getMapInfo() {
